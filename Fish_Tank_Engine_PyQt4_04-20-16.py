@@ -2,11 +2,12 @@ import sys
 
 import serial
 import threading
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 
-from tictoc import *
+# from tictoc import *
+
 import pyqtgraph as pg
 
 from ScanData import *          ## All data structure used to store the scan
