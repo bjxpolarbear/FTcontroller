@@ -17,7 +17,6 @@ from PyQtGraphSerialReader import *         ## A fetching script from a given se
 
 
 class MainUI(QMainWindow):
-    
 
     def __init__(self, parent=None):
         super(MainUI, self).__init__(parent=parent)
