@@ -80,6 +80,7 @@ celerybeat-schedule
 
 # virtualenv
 venv/
+venv2/
 ENV/
 
 # Spyder project settings
@@ -135,3 +136,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+#pyqtgraph
+pyqtgraph/

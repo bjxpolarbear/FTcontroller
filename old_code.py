@@ -330,12 +330,12 @@ class SegmentUI(QWidget):
                     y += tmpY
             return (x,y)
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
 class ScanUI(QWidget):
     
 
     def __init__(self,parent=None):
-        super(ScanUI, self).__init__(parent = parent)
+        super().__init__(parent=parent)
         # this is the list container for the segmentUIs
         self.segmentUIList = []                  
         self.scanData = ScanData()
@@ -469,13 +469,6 @@ class FishTankEngine(QApplication):
         self.main_UI.currentScanUI.removeSegmentBtn.clicked.connect(self.main_UI.currentScanUI.remove_segment)
 
 
-    def connect_master_serial(self, port):
-        try:    
-            self.serialPort = SerialPort(port)
-        except OSError:
-            self.announce('Master Connection Failed')
-        else:
-            self.announce('Master Serial Connected')
 
     def connect_slave_serial(self, port):
         try:
@@ -605,21 +598,7 @@ class SerialPort(QWidget):
                 print(line)
                 FishTankEngine.instance().announce(str(line),1)
                 
-'''
-class SerialRead(threading.Thread):
-    
-    def __init__(self, arg):
-        super(SerialRead, self).__init__()
-        self.ser = arg
-        self.buffer = []
-        self.paused = False
-        self.pause_cond = threading.Condition(threading.Lock())
 
-    def run(self):
-        timer_readFromArduino = QTimer(self)
-        timer_readFromArduino.timeout.connect(self.ser_read)
-        timer_readFromArduino.start(100)
-'''
 if __name__ == "__main__":
     
     ft_engine = FishTankEngine(sys.argv)
