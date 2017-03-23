@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from ScanData import *
+# from ScanData import *
 
 import pdb
 class SettingsUI(QDialog):
@@ -261,7 +261,7 @@ class SegmentUI(QWidget):
     def isValid(self):
 
         return True
-
+'''
     def get_segmentdata(self):
         self.segmentData = SegmentData()
         # print(type(self.segmentTypeText))
@@ -327,7 +327,8 @@ class SegmentUI(QWidget):
                 pass
             return (x, y)
 
-
+'''
+'''
 class ScanUI(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -409,3 +410,4 @@ class ScanUI(QWidget):
                 x += [a + x[-1] for a in tmpX]
             y += tmpY
         return (x, y)
+'''

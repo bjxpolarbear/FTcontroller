@@ -5,17 +5,16 @@ import json
 import serial
 import threading
 
-import data.scanClass as scanClass
+
 
 from ui.ui_mainwindowftcontroller import Ui_MainWindow
 
-from ScanData import SegmentData, DWdata, ScanData
-from ui.UIs import ScanUI, SegmentUI, SettingsUI
+from ui.UIs import SegmentUI, SettingsUI
 from PyQtGraphSerialReader import SerialReader
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5 import uic
+
 
 class FTMainWindow(QMainWindow,Ui_MainWindow):
 
