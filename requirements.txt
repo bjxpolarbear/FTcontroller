@@ -1,4 +1,0 @@
-numpy==1.11.2
-PyQt5==5.7
-pyserial==3.2.1
-sip==4.18.1
