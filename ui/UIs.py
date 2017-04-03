@@ -1,3 +1,5 @@
+import pyqtgraph as pg
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -46,6 +48,17 @@ class SettingsUI(QDialog):
         self.masterDisconnectBtn.clicked.connect(mainwindow.endMasterSerial)
         self.slaveConnectBtn.clicked.connect(lambda: mainwindow.connectSlaveSerial(self.slaveEdit.text()))
         self.slaveDisconnectBtn.clicked.connect(mainwindow.endSlaveSerial)
+
+class PlotUI(QDialog):
+
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.mainLayout = QGridLayout()
+        self.spectrumCanvas = pg.PlotWidget(self)
+        self.mainLayout.addWidget(self.spectrumCanvas)
+
+        self.setLayout(self.mainLayout)
 
 class SegmentUI(QWidget):
     """docstring for Scan"""

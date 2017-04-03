@@ -4,19 +4,19 @@ import pdb
 import json
 import serial
 import threading
-
+import pyqtgraph as pg
 
 
 from ui.ui_mainwindowftcontroller import Ui_MainWindow
 
-from ui.UIs import SegmentUI, SettingsUI
+from ui.UIs import SegmentUI, SettingsUI, PlotUI
 from PyQtGraphSerialReader import SerialReader
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 
-class FTMainWindow(QMainWindow,Ui_MainWindow):
+class FTMainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -30,13 +30,15 @@ class FTMainWindow(QMainWindow,Ui_MainWindow):
         self.scanContent.setLayout(self.scanLayout)
         self.scanArea.setWidget(self.scanContent)
         self.scanLayout.setAlignment(Qt.AlignLeft)
-        # (min,max) = self.splitter.getRange(0)  #trying to
+        # (min,max) = self.splitter.getRange(0)  #trying to set the default position of the splitter
         # self.splitter.moveSplitter(max,0)
 
+
+
+
         self.__genHeader()
+        self.__genPlot()
         # self.scanArea.setWidgetResizable(True)      #Important: allow the widget to update the size dynamically
-
-
         self.__connectSlot()
 
     def __genHeader(self):
@@ -60,6 +62,12 @@ class FTMainWindow(QMainWindow,Ui_MainWindow):
             self.headerTable.setItem(row, 0, QTableWidgetItem("A "+str(row+1)))
         for row in range(16,32):
             self.headerTable.setItem(row, 0, QTableWidgetItem("D "+str(row-15)))
+
+    def __genPlot(self):
+
+        pass
+        self.specDialog = PlotUI(self)
+        self.specDialog.show()
 
     def __connectSlot(self):
         self.addBtn.clicked.connect(self.addSegment)
