@@ -60,6 +60,9 @@ class PlotUI(QDialog):
 
         self.setLayout(self.mainLayout)
 
+    def plotSpec(self,x,y):
+        self.spectrumCanvas.plot(x, y, clear=True)
+
 class SegmentUI(QWidget):
     """docstring for Scan"""
 

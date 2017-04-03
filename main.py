@@ -67,14 +67,13 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
     def __genPlot(self):
 
-        pass
         self.specDialog = PlotUI(self)
         self.specDialog.show()
 
     def __connectSlot(self):
         self.addBtn.clicked.connect(self.addSegment)
         self.removeBtn.clicked.connect(self.removeSegment)
-        self.downloadBtn.clicked.connect(self.toJSON)
+        self.downloadBtn.clicked.connect(self.downloadScan)
 
         self.actionSettings.triggered.connect(self.settingsDialog)
 
@@ -114,6 +113,22 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         outputString = json.dumps(outputDict,sort_keys=True)
 
         self.announce(outputString)
+        return outputString
+
+    def downloadScan(self):
+
+        x= [1,2,3,4,5,6,7,8,9]
+        y= [1,0,-1,1,0,-1,1,0,-1,]
+        self.specDialog.plotSpec(x,y)
+        '''
+        outputString = self.toJSON()
+        if self.serialPort:
+            self.serialPort.ser_write(outputString)
+            self.announce("Scan downloaded")
+        else:
+            self.announce("No serial port found!")
+        '''
+
 
     def settingsDialog(self):
         self.settingsDialog = SettingsUI(self)
