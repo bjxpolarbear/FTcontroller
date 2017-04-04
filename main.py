@@ -37,7 +37,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
 
 
-
         self.__genHeader()
         self.__genPlot()
         # self.scanArea.setWidgetResizable(True)      #Important: allow the widget to update the size dynamically
@@ -116,7 +115,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         return outputString
 
     def downloadScan(self):
-
+        '''
         x= [1,2,3,4,5,6,7,8,9]
         y= [1,0,-1,1,0,-1,1,0,-1,]
         self.specDialog.plotSpec(x,y)
@@ -127,7 +126,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.announce("Scan downloaded")
         else:
             self.announce("No serial port found!")
-        '''
+
 
 
     def settingsDialog(self):
@@ -135,13 +134,28 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
         self.settingsDialog.show()
 
+    def listenThread(self):
+        self.announce('The start of listenThread')
+        # pdb.set_trace()
+        while self.serialPort.statusOn:
+            if self.serialPort.ser_read_inner:
+                line = self.serialPort.ser_read_inner()
+                print(line)
+                self.announce(line)
+
     def connectMasterSerial(self, port):
         try:
-            self.serialPort = SerialPort(port)
+            self.serialPort = SerialPort(port=port)#,parent=self)
+
         except OSError:
             self.announce('Master Connection Failed')
         else:
             self.announce('Master Serial Connected')
+        # strIn = self.serialPort.ser_read_inner()
+        # self.announce(strIn)
+        self.readThread = threading.Thread(target=self.listenThread)
+        self.readThread.start()
+
 
     def endMasterSerial(self):
         try:
@@ -173,17 +187,20 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
 
 class SerialPort(QWidget):
-    def __init__(self, *arg):
-        super(SerialPort, self).__init__()
-        self.ser = serial.Serial(*arg, baudrate=115200, timeout=0)
+    def __init__(self, parent=None, port=None):
+        super().__init__()
+
+
+        self.ser = serial.Serial(port, baudrate=115200, timeout=0)
         self.statusOn = True
 
-        self.readThread = threading.Thread(target=self.ser_read_inner)
-        self.readThread.start()
+
 
     def ser_write(self, inStr):
+        inStr = inStr + '#'
+
         self.statusOn = False
-        self.ser.write(inStr)
+        self.ser.write(inStr.encode('ascii'))
         self.statusOn = True
 
     # def ser_read_outer(self):
@@ -192,14 +209,16 @@ class SerialPort(QWidget):
     #     timer_readFromArduino.start(100)
 
     def ser_read_inner(self):
-        while self.statusOn:
-            line = self.ser.readline().decode('ascii')
+        # pdb.set_trace()
+        # print('read inner')
+        while self.serialPort.statusOn:
+            if self.ser and self.statusOn ==True:
+                # print('there is a serial and the status is fine')
 
-            # time.sleep(0.1)
-            if len(line) > 0:
-                print(line)
-                self.announce(str(line), 1)
-
+                line = self.ser.readline().decode('ascii')
+                if line is not None:
+                    print(line)
+                    return line
 
 
 
