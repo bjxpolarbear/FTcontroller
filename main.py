@@ -122,7 +122,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         '''
         outputString = self.toJSON()
         if self.serialPort:
-            self.serialPort.ser_write(outputString)
+            #self.serialPort.ser_write(outputString)
             self.announce("Scan downloaded")
         else:
             self.announce("No serial port found!")

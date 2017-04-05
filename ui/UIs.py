@@ -247,10 +247,13 @@ class SegmentUI(QWidget):
         except ValueError:
             outputDict['para2'] = None
         try:
-            outputDict['para3']=float(self.parameterBox2.text())
+            outputDict['para3']=float(self.parameterBox3.text())
         except ValueError:
             outputDict['para3'] = None
-
+        try:
+            outputDict['duration']=float(self.durationLine.text())
+        except ValueError:
+            outputDict['duration'] = None
 
 
         outputDict['analog']=[]
