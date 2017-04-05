@@ -7,7 +7,7 @@ import json
 import serial
 import threading
 import pyqtgraph as pg
-
+from time import sleep
 
 from ui.ui_mainwindowftcontroller import Ui_MainWindow
 
@@ -136,12 +136,14 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
     def listenThread(self):
         self.announce('The start of listenThread')
-        # pdb.set_trace()
+
         while self.serialPort.statusOn:
+            sleep(0.1)
             if self.serialPort.ser_read_inner:
                 line = self.serialPort.ser_read_inner()
-                print(line)
-                self.announce(line)
+                if line is not None:
+                    print(line)
+                # self.announce(line)
 
     def connectMasterSerial(self, port):
         try:
@@ -153,6 +155,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.announce('Master Serial Connected')
         # strIn = self.serialPort.ser_read_inner()
         # self.announce(strIn)
+        # pdb.set_trace()
         self.readThread = threading.Thread(target=self.listenThread)
         self.readThread.start()
 
@@ -211,14 +214,11 @@ class SerialPort(QWidget):
     def ser_read_inner(self):
         # pdb.set_trace()
         # print('read inner')
-        while self.serialPort.statusOn:
-            if self.ser and self.statusOn ==True:
-                # print('there is a serial and the status is fine')
-
-                line = self.ser.readline().decode('ascii')
-                if line is not None:
-                    print(line)
-                    return line
+        if self.ser and self.statusOn:
+            line = self.ser.readline().decode('ascii').strip('\r\n')
+            if line is not '':
+                # print(line)
+                return line
 
 
 
