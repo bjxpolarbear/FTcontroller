@@ -183,7 +183,7 @@ class SerialPort(QWidget):
 
     def ser_write(self, inStr):
         self.statusOn = False
-        self.ser.write(inStr)
+        self.ser.write(inStr.endcode('ascii'))
         self.statusOn = True
 
     # def ser_read_outer(self):
