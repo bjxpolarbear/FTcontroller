@@ -1,5 +1,3 @@
-#Hi Jason! How are you?
-#I am great!
 import os
 import sys
 import pdb
@@ -73,6 +71,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         self.addBtn.clicked.connect(self.addSegment)
         self.removeBtn.clicked.connect(self.removeSegment)
         self.downloadBtn.clicked.connect(self.downloadScan)
+        self.uploadBtn.clicked.connect(self.uploadScan)
 
         self.actionSettings.triggered.connect(self.settingsDialog)
 
@@ -121,13 +120,23 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         self.specDialog.plotSpec(x,y)
         '''
         outputString = self.toJSON()
-        if self.serialPort:
-            #self.serialPort.ser_write(outputString)
+        # if self.serialPort:
+        try:
+            self.serialPort.ser_write('D')
+            # sleep(0.5)
+            outputString = outputString+'#'
+            self.serialPort.ser_write(outputString)
+            # sleep(5)
             self.announce("Scan downloaded")
-        else:
+        except:
             self.announce("No serial port found!")
 
-
+    def uploadScan(self):
+        # if self.serialPort:
+        try:
+            self.serialPort.ser_write('U')
+        except:
+            self.announce("No serial port found!")
 
     def settingsDialog(self):
         self.settingsDialog = SettingsUI(self)
@@ -142,8 +151,10 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             if self.serialPort.ser_read_inner:
                 line = self.serialPort.ser_read_inner()
                 if line is not None:
-                    print(line)
-                # self.announce(line)
+                    # print(line)
+                    self.announce(line)
+
+        self.announce('listenThread is dead')
 
     def connectMasterSerial(self, port):
         try:
@@ -156,19 +167,20 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         # strIn = self.serialPort.ser_read_inner()
         # self.announce(strIn)
         # pdb.set_trace()
-        self.readThread = threading.Thread(target=self.listenThread)
-        self.readThread.start()
+            self.readThread = threading.Thread(target=self.listenThread)
+            self.readThread.start()
 
 
     def endMasterSerial(self):
         try:
-            self.serialPort.ser_write(b'E')
+            self.serialPort.ser_write('E')
             self.serialPort.statusOn = False
             self.serialPort.ser.close()
             self.announce('Master serial port terminated')
         except:
             self.announce('Error: No master serial found')
-
+        # if self.readThread:
+            # self.readThread. #stop it
     def connectSlaveSerial(self, port):
         try:
             self.slaveSerialPort = SerialPort(port)
@@ -179,7 +191,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
 
     def endSlaveSerial(self):
         try:
-            self.slaveSerialPort.ser_write(b'E')
+            self.slaveSerialPort.ser_write('E')
             self.slaveSerialPort.statusOn = False
             self.slaveSerialPort.ser.close()
             self.announce('Slave serial port terminated')
@@ -200,11 +212,9 @@ class SerialPort(QWidget):
 
 
     def ser_write(self, inStr):
-        inStr = inStr + '#'
-
-        self.statusOn = False
+        # self.statusOn = False
         self.ser.write(inStr.encode('ascii'))
-        self.statusOn = True
+        # self.statusOn = True
 
     # def ser_read_outer(self):
     #     timer_readFromArduino = QTimer(self)
@@ -219,7 +229,7 @@ class SerialPort(QWidget):
             if line is not '':
                 # print(line)
                 return line
-
+            return None
 
 
 if __name__ == "__main__":
