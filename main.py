@@ -63,7 +63,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.headerTable.setItem(row, 0, QTableWidgetItem("D "+str(row-15)))
 
     def __genPlot(self):
-
         self.specDialog = PlotUI(self)
         self.specDialog.show()
 
@@ -76,8 +75,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         self.actionSettings.triggered.connect(self.settingsDialog)
 
     def removeSegment(self):
-
-        if len(self.scanList)>0:
+        if len(self.scanList) > 0:
             # pdb.set_trace()
             self.scanList[-1].hide()
             self.scanLayout.removeWidget(self.scanList[-1])
@@ -87,16 +85,19 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.announce('Not enough segments')
 
-
-
     def addSegment(self):
         self.scanList.append(SegmentUI(parent=self))
         self.scanLayout.addWidget(self.scanList[-1])
+        # pdb.set_trace()
+        # self.scanList[-1].segmentType.activated[str].connect(lambda: self.toPlot())
+        # self.scanList[-1].durationLine.textChanged.connect(lambda: self.toPlot())
+        # self.scanList[-1].parameterBox1.textChanged.connect(lambda: self.toPlot())
+        # pdb.set_trace()
+        self.scanList[-1].isChangedSignal.connect(lambda: self.toPlot())
         self.announce('One segment added!')
 
     def announce(self, text):
         self.announcer.appendPlainText(text)
-
 
     def isValid(self):
         pass
@@ -105,34 +106,61 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         tmpScanList = []
         for segment in self.scanList:
             tmpScanList.append(segment.toDict())
-        outputDict={}
-        outputDict['job']='download'
-        outputDict['data']=tmpScanList
-        outputString = json.dumps(outputDict,sort_keys=True)
+        outputDict = {}
+        outputDict['job'] = 'download'
+        outputDict['data'] = tmpScanList
+        outputString = json.dumps(outputDict, sort_keys=True)
 
         self.announce(outputString)
         return outputString
 
+    def toPlot(self):
+        self.timeAxis = []
+        self.freqAxis = []
+        for segment in self.scanList:
+            # if self.timeAxis == []:
+            #     self.timeAxis.append(0)
+            # else:
+            #     self.timeAxis.append(self.timeAxis[-1])
+            try:
+                self.timeAxis.append(self.timeAxis[-1])
+            except:
+                self.timeAxis.append(0)
+            try:
+                self.freqAxis.append(float(segment.parameterBox1.text()))
+            except:
+                self.freqAxis.append(0)
+            try:
+                self.timeAxis.append(float(segment.durationLine.text()) + self.timeAxis[-1])
+            except:
+                self.timeAxis.append(0)
+            try:
+                self.freqAxis.append(float(segment.parameterBox2.text()))
+            except:
+                self.freqAxis.append(0)
+        self.specDialog.plotSpec(self.timeAxis, self.freqAxis)
+        # self.announce(str(self.timeAxis))
+        # self.announce(str(self.freqAxis))
+
     def downloadScan(self):
-        '''
-        x= [1,2,3,4,5,6,7,8,9]
-        y= [1,0,-1,1,0,-1,1,0,-1,]
-        self.specDialog.plotSpec(x,y)
-        '''
         outputString = self.toJSON()
-        # if self.serialPort:
         try:
             self.serialPort.ser_write('D')
             # sleep(0.5)
-            outputString = outputString+'#'
+            outputString = outputString + '#'
             self.serialPort.ser_write(outputString)
             # sleep(5)
             self.announce("Scan downloaded")
+            # try:
+            #     self.toPlot()
+            #     self.specDialog.plotSpec(self.timeAxis, self.freqAxis)
+            #     pdb.set_trace()
+            # except:
+            #     self.announce("Plotting scan function failed")
         except:
             self.announce("No serial port found!")
 
     def uploadScan(self):
-        # if self.serialPort:
         try:
             self.serialPort.ser_write('U')
         except:
@@ -170,7 +198,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.readThread = threading.Thread(target=self.listenThread)
             self.readThread.start()
 
-
     def endMasterSerial(self):
         try:
             self.serialPort.ser_write('E')
@@ -179,8 +206,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.announce('Master serial port terminated')
         except:
             self.announce('Error: No master serial found')
-        # if self.readThread:
-            # self.readThread. #stop it
+
     def connectSlaveSerial(self, port):
         try:
             self.slaveSerialPort = SerialPort(port)
@@ -208,8 +234,6 @@ class SerialPort(QWidget):
 
         self.ser = serial.Serial(port, baudrate=115200, timeout=0)
         self.statusOn = True
-
-
 
     def ser_write(self, inStr):
         # self.statusOn = False

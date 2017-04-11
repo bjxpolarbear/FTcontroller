@@ -13,7 +13,7 @@ class SettingsUI(QDialog):
 
         self.mainLayout = QGridLayout()
 
-        self.masterLabel=QLabel('Master: ')
+        self.masterLabel = QLabel('Master: ')
         self.masterEdit = QLineEdit()
         self.masterConnectBtn = QPushButton('Connect Master')
         self.masterDisconnectBtn = QPushButton('Disconnect Master')
@@ -65,7 +65,7 @@ class PlotUI(QDialog):
 
 class SegmentUI(QWidget):
     """docstring for Scan"""
-
+    isChangedSignal = pyqtSignal()
     def __init__(self, parent=None):
 
         super(SegmentUI, self).__init__(parent=parent)
@@ -103,14 +103,13 @@ class SegmentUI(QWidget):
         self.parameter1.addWidget(self.parameterLabel1, Qt.AlignTop)
         self.parameter1.addWidget(self.parameterBox1, Qt.AlignTop)
 
-
         self.parameterLabel2 = QLabel()
         self.parameterBox2 = QLineEdit()
         self.parameter2 = QHBoxLayout()
         self.parameter2.addWidget(self.parameterLabel2, Qt.AlignTop)
         self.parameter2.addWidget(self.parameterBox2, Qt.AlignTop)
 
-        self.parameterLabel3 = QLabel('')
+        self.parameterLabel3 = QLabel()
         self.parameterBox3 = QLineEdit()
         self.parameter3 = QHBoxLayout()
         self.parameter3.addWidget(self.parameterLabel3, Qt.AlignTop)
@@ -126,8 +125,8 @@ class SegmentUI(QWidget):
         self.parameterTable.verticalHeader().setDefaultSectionSize(24)
         for row in range(ROW_NUM//2,ROW_NUM):
             comboBox = QComboBox()
-            comboBox.addItem('True')
             comboBox.addItem('False')
+            comboBox.addItem('True')
             self.parameterTable.setCellWidget(row, 0, comboBox)
         self.parameterTable.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -150,6 +149,11 @@ class SegmentUI(QWidget):
         self.setFixedHeight(272+ROW_NUM*32)
 
     def type_select(self, inpStr):
+        try:
+            self.parameterBox1.textChanged.disconnect() #Ensure parameter1 and 2 aren't mirroring each other for other segment types
+        except:
+            pass
+
         if inpStr == 'Fixed':
             self.segmentTypeText = 'f'
             self.parameterLabel1.show()
@@ -158,13 +162,16 @@ class SegmentUI(QWidget):
             self.parameterBox2.show()
             self.parameterLabel3.show()
             self.parameterBox3.show()
-            self.parameterLabel1.setText("Frequency")
+            self.parameterLabel1.setText("Start Frequency")
             self.parameterBox1.setText('100000')
-            self.parameterLabel2.setText("Duty Cycle")
-            self.parameterBox2.setText('50')
-            self.parameterLabel3.setText("N/A")
-            self.parameterBox3.setText('N/A')
-            self.parameterBox3.setEnabled(False)
+            self.parameterBox1.setEnabled(True)
+            self.parameterLabel2.setText("End Frequency")
+            self.parameterBox2.setText(self.parameterBox1.text())
+            self.parameterBox1.textChanged.connect(self.parameterBox2.setText) #Mirror parameter1 and 2 for Fixed frequency
+            self.parameterBox2.setEnabled(False)
+            self.parameterLabel3.setText("Duty Cycle")
+            self.parameterBox3.setText('50')
+            self.parameterBox3.setEnabled(True)
             self.parameterTable.show()
 
         elif inpStr == 'Ramp':
@@ -177,12 +184,14 @@ class SegmentUI(QWidget):
             self.parameterBox3.show()
             self.parameterLabel1.setText("Start Frequency")
             self.parameterBox1.setText('100000')
+            self.parameterBox1.setEnabled(True)
             self.parameterLabel2.setText("End Frequency")
             self.parameterBox2.setText('200000')
+            self.parameterBox2.setEnabled(True)
             self.parameterLabel3.setText("Duty Cycle")
             self.parameterBox3.setText('50')
+            self.parameterBox3.setEnabled(True)
             self.parameterTable.show()
-
 
         elif inpStr == 'Mass Analysis':
             self.segmentTypeText = 'm'
@@ -194,10 +203,13 @@ class SegmentUI(QWidget):
             self.parameterBox3.show()
             self.parameterLabel1.setText("Start Frequency")
             self.parameterBox1.setText('400000')
+            self.parameterBox1.setEnabled(True)
             self.parameterLabel2.setText("End Frequency")
             self.parameterBox2.setText('100000')
+            self.parameterBox2.setEnabled(True)
             self.parameterLabel3.setText("ps per step")
             self.parameterBox3.setText('5')
+            self.parameterBox3.setEnabled(True)
             self.parameterTable.show()
 
         elif inpStr == 'Dump':
@@ -208,13 +220,13 @@ class SegmentUI(QWidget):
             self.parameterBox2.show()
             self.parameterLabel3.show()
             self.parameterBox3.show()
-            self.parameterLabel1.setText("N/A")
+            self.parameterLabel1.setText("Start Frequency")
             self.parameterBox1.setText('N/A')
             self.parameterBox1.setEnabled(False)
-            self.parameterLabel2.setText("N/A")
+            self.parameterLabel2.setText("End Frequency")
             self.parameterBox2.setText('N/A')
             self.parameterBox2.setEnabled(False)
-            self.parameterLabel3.setText("N/A")
+            self.parameterLabel3.setText("Duty Cycle")
             self.parameterBox3.setText('N/A')
             self.parameterBox3.setEnabled(False)
             self.parameterTable.show()
@@ -229,11 +241,24 @@ class SegmentUI(QWidget):
             self.parameterBox3.show()
             self.parameterLabel1.setText("Start Segment")
             self.parameterBox1.setText('1')
+            self.parameterBox1.setEnabled(True)
             self.parameterLabel2.setText("End Segment")
             self.parameterBox2.setText('2')
+            self.parameterBox2.setEnabled(True)
             self.parameterLabel3.setText("Iteration Number")
             self.parameterBox3.setText('3')
+            self.parameterBox3.setEnabled(True)
             self.parameterTable.show()
+
+        # Signals that segment changed - for real time plot updating
+        self.segmentType.activated[str].connect(self.isChanged)
+        self.parameterBox1.textChanged.connect(self.isChanged)
+        self.parameterBox2.textChanged.connect(self.isChanged)
+        self.parameterBox3.textChanged.connect(self.isChanged)
+        self.durationLine.textChanged.connect(self.isChanged)
+
+    def isChanged(self):
+        self.isChangedSignal.emit()
 
     def toDict(self):
         outputDict={}
@@ -278,8 +303,8 @@ class SegmentUI(QWidget):
         return outputDict
 
     def isValid(self):
-
         return True
+
 '''
     def get_segmentdata(self):
         self.segmentData = SegmentData()
