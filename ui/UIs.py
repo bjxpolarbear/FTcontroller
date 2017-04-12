@@ -57,7 +57,6 @@ class PlotUI(QDialog):
         self.mainLayout = QGridLayout()
         self.spectrumCanvas = pg.PlotWidget(self)
         self.mainLayout.addWidget(self.spectrumCanvas)
-
         self.setLayout(self.mainLayout)
 
     def plotSpec(self,x,y):
@@ -70,7 +69,7 @@ class SegmentUI(QWidget):
 
         super(SegmentUI, self).__init__(parent=parent)
 
-        ROW_NUM = 32
+        ROW_NUM = 37
 
         # self.idx = idx_in
         self.name = ''
@@ -123,7 +122,8 @@ class SegmentUI(QWidget):
         self.parameterTable.horizontalHeader().hide()
         self.parameterTable.verticalHeader().hide()
         self.parameterTable.verticalHeader().setDefaultSectionSize(24)
-        for row in range(ROW_NUM//2,ROW_NUM):
+        self.parameterTable.setFixedHeight(37*24)
+        for row in range(16,ROW_NUM):
             comboBox = QComboBox()
             comboBox.addItem('False')
             comboBox.addItem('True')
@@ -146,7 +146,7 @@ class SegmentUI(QWidget):
 
         self.type_select('Fixed')
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.setFixedHeight(272+ROW_NUM*32)
+        # self.setFixedHeight(272+ROW_NUM*32)
 
     def type_select(self, inpStr):
         try:
@@ -250,7 +250,7 @@ class SegmentUI(QWidget):
             self.parameterBox3.setEnabled(True)
             self.parameterTable.show()
 
-        # Signals that segment changed - for real time plot updating
+        # Signals for segment changes - for real time plot updating
         self.segmentType.activated[str].connect(self.isChanged)
         self.parameterBox1.textChanged.connect(self.isChanged)
         self.parameterBox2.textChanged.connect(self.isChanged)
@@ -293,7 +293,7 @@ class SegmentUI(QWidget):
 
 
         outputDict['digital'] = []
-        for row in range(16,32):
+        for row in range(16,37):
 
             if self.parameterTable.cellWidget(row, 0).currentText() == 'True':
                 outputDict['digital'].append(True)

@@ -43,23 +43,23 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
     def __genHeader(self):
         self.headerTable = QTableWidget()
         self.headerTable.setColumnCount(1)
-        self.headerTable.setRowCount(32)
+        self.headerTable.setRowCount(37)
         self.headerTable.horizontalHeader().hide()
         self.headerTable.verticalHeader().hide()
+        self.headerTable.verticalHeader().setDefaultSectionSize(24)
         self.headerTable.horizontalHeader().setStretchLastSection(True)
         self.headerTable.setFixedWidth(80)
-        self.headerTable.setFixedHeight(1055)
+        self.headerTable.setFixedHeight(37*24)
         self.headerTable.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.headerTable.verticalHeader().setDefaultSectionSize(24)
-        self.headerSpacer = QSpacerItem(80, 90, QSizePolicy.Fixed)
         self.headerLayout = QVBoxLayout()
-        self.headerLayout.addItem(self.headerSpacer)
+        self.headerLayout.addSpacing(165)
         self.headerLayout.addWidget(self.headerTable)
         self.scanLayout.addLayout(self.headerLayout)
+        self.scanLayout.setAlignment(self.headerLayout, Qt.AlignTop)
 
         for row in range(16):
             self.headerTable.setItem(row, 0, QTableWidgetItem("A "+str(row+1)))
-        for row in range(16,32):
+        for row in range(16,37):
             self.headerTable.setItem(row, 0, QTableWidgetItem("D "+str(row-15)))
 
     def __genPlot(self):
@@ -71,6 +71,8 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         self.removeBtn.clicked.connect(self.removeSegment)
         self.downloadBtn.clicked.connect(self.downloadScan)
         self.uploadBtn.clicked.connect(self.uploadScan)
+        self.runBtn.clicked.connect(self.runScan)
+        self.stopBtn.clicked.connect(self.stopScan)
 
         self.actionSettings.triggered.connect(self.settingsDialog)
 
@@ -88,11 +90,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
     def addSegment(self):
         self.scanList.append(SegmentUI(parent=self))
         self.scanLayout.addWidget(self.scanList[-1])
-        # pdb.set_trace()
-        # self.scanList[-1].segmentType.activated[str].connect(lambda: self.toPlot())
-        # self.scanList[-1].durationLine.textChanged.connect(lambda: self.toPlot())
-        # self.scanList[-1].parameterBox1.textChanged.connect(lambda: self.toPlot())
-        # pdb.set_trace()
+        self.scanLayout.setAlignment(Qt.AlignTop)
         self.scanList[-1].isChangedSignal.connect(lambda: self.toPlot())
         self.announce('One segment added!')
 
@@ -118,10 +116,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         self.timeAxis = []
         self.freqAxis = []
         for segment in self.scanList:
-            # if self.timeAxis == []:
-            #     self.timeAxis.append(0)
-            # else:
-            #     self.timeAxis.append(self.timeAxis[-1])
             try:
                 self.timeAxis.append(self.timeAxis[-1])
             except:
@@ -139,8 +133,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             except:
                 self.freqAxis.append(0)
         self.specDialog.plotSpec(self.timeAxis, self.freqAxis)
-        # self.announce(str(self.timeAxis))
-        # self.announce(str(self.freqAxis))
 
     def downloadScan(self):
         outputString = self.toJSON()
@@ -151,12 +143,6 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
             self.serialPort.ser_write(outputString)
             # sleep(5)
             self.announce("Scan downloaded")
-            # try:
-            #     self.toPlot()
-            #     self.specDialog.plotSpec(self.timeAxis, self.freqAxis)
-            #     pdb.set_trace()
-            # except:
-            #     self.announce("Plotting scan function failed")
         except:
             self.announce("No serial port found!")
 
@@ -166,13 +152,25 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
         except:
             self.announce("No serial port found!")
 
+    def runScan(self):
+        try:
+            self.serialPort.ser_write('R')
+        except:
+            self.announce("No serial port found!")
+
+    def stopScan(self):
+        try:
+            self.serialPort.ser_write('S')
+        except:
+            self.announce("No serial port found!")
+
     def settingsDialog(self):
         self.settingsDialog = SettingsUI(self)
 
         self.settingsDialog.show()
 
     def listenThread(self):
-        self.announce('The start of listenThread')
+        # self.announce('The start of listenThread')
 
         while self.serialPort.statusOn:
             sleep(0.1)
@@ -182,7 +180,7 @@ class FTMainWindow(QMainWindow, Ui_MainWindow):
                     # print(line)
                     self.announce(line)
 
-        self.announce('listenThread is dead')
+        # self.announce('listenThread is dead')
 
     def connectMasterSerial(self, port):
         try:

@@ -10,8 +10,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        screen = QtWidgets.QApplication.desktop()
+        screenGeometry = screen.screenGeometry()
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(907, 655)
+        # MainWindow.resize(907, 655)
+        MainWindow.setGeometry(50, 50, screenGeometry.width() - 100, screenGeometry.height() - 100)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
@@ -51,6 +54,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.scanArea)
         self.widget = QtWidgets.QWidget(self.splitter)
         self.widget.setObjectName("widget")
+        self.splitter.setSizes([1, 0])
         self.verticalLayout = QtWidgets.QVBoxLayout(self.widget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
